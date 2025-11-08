@@ -93,14 +93,30 @@ The toolkit will:
 
 ### Step 4: Test Your Agent
 
+### Step 3: Test Your Agent
+
 Test the deployed agent using the CLI:
 
+**Windows PowerShell:**
+```powershell
+agentcore invoke '{\"prompt\": \"How can I optimize my EC2 costs?\"}'
+```
+
+**Linux/Mac/Git Bash:**
 ```bash
 agentcore invoke '{"prompt": "How can I optimize my EC2 costs?"}'
 ```
 
-Or test with different queries:
+More test examples:
 
+**Windows:**
+```powershell
+agentcore invoke '{\"prompt\": \"What are S3 best practices?\"}'
+agentcore invoke '{\"prompt\": \"My Lambda function is timing out\"}'
+agentcore invoke '{\"prompt\": \"How can I reduce my AWS bill?\"}'
+```
+
+**Linux/Mac:**
 ```bash
 agentcore invoke '{"prompt": "What are S3 best practices?"}'
 agentcore invoke '{"prompt": "My Lambda function is timing out"}'
