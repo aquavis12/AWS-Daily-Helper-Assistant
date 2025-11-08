@@ -193,22 +193,16 @@ For detailed architecture diagrams and flow charts, see [DIAGRAMS.txt](DIAGRAMS.
 .
 ├── my_agent.py                 # Main agent implementation
 ├── chat.py                     # Interactive terminal chat interface
-├── test_agent.py               # Local testing script
 ├── requirements.txt            # Python dependencies
-├── .bedrock_agentcore.yaml     # AgentCore configuration
 ├── README.md                   # This file
-├── ARCHITECTURE.md             # Detailed architecture diagrams
 ├── DIAGRAMS.txt                # ASCII architecture diagrams
-├── PROJECT_SUMMARY.md          # Project overview
-├── blog.md                     # Blog post about the project
-└── .venv/                      # Virtual environment (created locally)
 ```
 
 ## ⚙️ Configuration
 
 The agent uses the following default configuration:
 - **Region**: us-east-1
-- **Runtime**: Python 3.11+ on ARM64
+- **Runtime**: Python 3.11+ 
 - **Agent Name**: my_agent (configurable during setup)
 - **Deployment**: Serverless via AWS Bedrock AgentCore
 
