@@ -3,19 +3,29 @@ AWS Daily Helper Assistant - Bedrock AgentCore Deployment
 
 An AI assistant that helps users with daily AWS tasks and questions.
 Deployed using Strands Agents framework to AWS Bedrock AgentCore.
+Uses AWS Bedrock Claude 3 for intelligent responses.
 """
 
-from typing import Dict, Callable
+import json
+import boto3
+from typing import Dict
 from bedrock_agentcore.runtime import BedrockAgentCoreApp
 from strands import Agent
 
 # Initialize the Bedrock AgentCore app
 app = BedrockAgentCoreApp()
 
+# Initialize Bedrock client for LLM
+bedrock_runtime = boto3.client(
+    service_name='bedrock-runtime',
+    region_name='us-east-1'
+)
+
 
 class AWSHelpingAssistant(Agent):
     """
     An AI assistant that helps with daily AWS tasks and questions.
+    Uses AWS Bedrock Claude 3 for intelligent, context-aware responses.
     
     Capabilities:
     - EC2 instance management and optimization
@@ -25,114 +35,97 @@ class AWSHelpingAssistant(Agent):
     - General AWS architecture and service recommendations
     """
     
-    # Response templates for different AWS services
-    RESPONSES = {
-        "ec2": """**EC2 Assistance**
+    # System prompt for the LLM
+    SYSTEM_PROMPT = """You are an expert AWS Solutions Architect and DevOps consultant. Your role is to help users with AWS-related questions and provide practical, actionable advice.
 
-Here's help with your EC2 question:
-• Check your instance types and sizes for cost optimization
-• Ensure security groups are properly configured
-• Consider using Auto Scaling for better resource management
-• Monitor CloudWatch metrics for performance insights
+Your expertise includes:
+- EC2: Instance types, Auto Scaling, security groups, optimization
+- S3: Storage classes, lifecycle policies, versioning, security, bucket policies
+- Lambda: Function optimization, memory allocation, error handling, cost management
+- Cost Optimization: Billing analysis, Reserved Instances, cost reduction strategies
+- General AWS: Architecture design, best practices, security, compliance
 
-Would you like specific guidance on any of these areas?""",
-        
-        "s3": """**S3 Assistance**
+Guidelines:
+- Provide clear, concise, and actionable advice
+- Use bullet points for easy reading
+- Include specific examples when helpful
+- Always consider cost optimization and security
+- Be friendly and professional
+- If you don't know something, be honest about it
 
-S3 best practices:
-• Use appropriate storage classes (Standard, IA, Glacier)
-• Enable versioning for important data
-• Set up lifecycle policies to manage costs
-• Configure proper bucket policies and ACLs
-
-Need help with a specific S3 task?""",
-        
-        "lambda": """**Lambda Assistance**
-
-Lambda optimization tips:
-• Right-size your memory allocation
-• Use environment variables for configuration
-• Implement proper error handling and retries
-• Monitor execution duration and costs
-
-What specific Lambda challenge can I help with?""",
-        
-        "cost": """**AWS Cost Optimization**
-
-Cost management strategies:
-• Use AWS Cost Explorer to analyze spending
-• Set up billing alerts and budgets
-• Consider Reserved Instances for predictable workloads
-• Regularly review and terminate unused resources
-
-Would you like help setting up cost monitoring?""",
-        
-        "general": """**AWS General Assistance**
-
-I'm here to help with your AWS questions! I can assist with:
-• Service recommendations and best practices
-• Cost optimization strategies
-• Security and compliance guidance
-• Architecture design suggestions
-
-Please provide more details about what you'd like help with."""
-    }
+Format your responses with clear sections and bullet points."""
     
     def __init__(self):
         super().__init__(
             name="AWS Daily Helper",
-            description="An AI assistant that helps with daily AWS tasks and questions. Provides expert guidance on EC2, S3, Lambda, cost optimization, and general AWS best practices."
+            description="An AI assistant powered by AWS Bedrock Claude 3 that helps with daily AWS tasks and questions. Provides expert guidance on EC2, S3, Lambda, cost optimization, and general AWS best practices."
         )
-        
-        # Map keywords to response types
-        self.keyword_map = {
-            "ec2": "ec2",
-            "s3": "s3",
-            "lambda": "lambda",
-            "cost": "cost",
-            "billing": "cost",
-            "price": "cost",
-            "budget": "cost"
-        }
+        self.model_id = "anthropic.claude-3-sonnet-20240229-v1:0"
+        self.conversation_history = []
     
     def process_request(self, user_input: str) -> str:
         """
-        Process user requests and provide AWS assistance.
+        Process user requests using AWS Bedrock LLM.
         
         Args:
             user_input: The user's question or request
             
         Returns:
-            A formatted response with AWS guidance
+            An intelligent response from Claude 3
         """
         if not user_input or not user_input.strip():
-            return self.RESPONSES["general"]
+            return "Hello! I'm your AWS Daily Helper Assistant. How can I help you with AWS today?"
         
-        # Detect the service type from user input
-        service_type = self._detect_service(user_input)
-        
-        # Return the appropriate response
-        return self.RESPONSES.get(service_type, self.RESPONSES["general"])
+        try:
+            # Get response from Bedrock LLM
+            response = self._get_llm_response(user_input)
+            return response
+        except Exception as e:
+            # Fallback to basic response if LLM fails
+            return f"I apologize, but I encountered an error: {str(e)}\n\nPlease try rephrasing your question or check your AWS credentials."
     
-    def _detect_service(self, user_input: str) -> str:
+    def _get_llm_response(self, user_input: str) -> str:
         """
-        Detect which AWS service the user is asking about.
+        Get response from AWS Bedrock Claude 3.
         
         Args:
             user_input: The user's question
             
         Returns:
-            The service type identifier
+            The LLM's response
         """
-        user_input_lower = user_input.lower()
+        # Prepare the prompt
+        prompt = f"\n\nHuman: {user_input}\n\nAssistant:"
         
-        # Check for keyword matches
-        for keyword, service_type in self.keyword_map.items():
-            if keyword in user_input_lower:
-                return service_type
+        # Prepare the request body
+        body = json.dumps({
+            "anthropic_version": "bedrock-2023-05-31",
+            "max_tokens": 1000,
+            "system": self.SYSTEM_PROMPT,
+            "messages": [
+                {
+                    "role": "user",
+                    "content": user_input
+                }
+            ],
+            "temperature": 0.7,
+            "top_p": 0.9
+        })
         
-        # Default to general assistance
-        return "general"
+        # Call Bedrock
+        response = bedrock_runtime.invoke_model(
+            modelId=self.model_id,
+            body=body
+        )
+        
+        # Parse response
+        response_body = json.loads(response['body'].read())
+        
+        # Extract the text from Claude's response
+        if 'content' in response_body and len(response_body['content']) > 0:
+            return response_body['content'][0]['text']
+        else:
+            return "I apologize, but I couldn't generate a response. Please try again."
 
 
 # Create the agent instance
