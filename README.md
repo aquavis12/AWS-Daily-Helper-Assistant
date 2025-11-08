@@ -25,12 +25,26 @@ git clone https://github.com/aquavis12/AWS-Daily-Helper-Assistant
 cd https://github.com/aquavis12/AWS-Daily-Helper-Assistant
 ```
 
-2. Install dependencies:
+2. Create and activate a virtual environment:
+
+**Windows:**
+```bash
+python -m venv .venv
+.venv\Scripts\activate
+```
+
+**Linux/Mac:**
+```bash
+python -m venv .venv
+source .venv/bin/activate
+```
+
+3. Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
-3. Configure AWS credentials:
+4. Configure AWS credentials:
 ```bash
 aws configure
 ```
