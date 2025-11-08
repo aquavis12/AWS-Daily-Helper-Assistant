@@ -1,0 +1,311 @@
+AWS DAILY HELPER ASSISTANT - ARCHITECTURE DIAGRAMS
+==================================================
+
+1. HIGH-LEVEL SYSTEM ARCHITECTURE
+==================================
+
+    ┌─────────────────────────────────────────────────────────────┐
+    │                      USER INTERFACES                         │
+    │                                                              │
+    │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐   │
+    │  │   AWS    │  │   CLI    │  │   API    │  │   SDK    │   │
+    │  │ Console  │  │agentcore │  │  Calls   │  │  boto3   │   │
+    │  └────┬─────┘  └────┬─────┘  └────┬─────┘  └────┬─────┘   │
+    └───────┼─────────────┼─────────────┼─────────────┼──────────┘
+            │             │             │             │
+            └─────────────┴─────────────┴─────────────┘
+                              │
+                              ▼
+    ┌─────────────────────────────────────────────────────────────┐
+    │              AWS BEDROCK AGENTCORE RUNTIME                   │
+    │                                                              │
+    │  ┌────────────────────────────────────────────────────┐    │
+    │  │  • Request Authentication & Authorization          │    │
+    │  │  • Event Routing & Session Management              │    │
+    │  │  • Auto-scaling & Load Balancing                   │    │
+    │  └──────────────────────┬─────────────────────────────┘    │
+    └─────────────────────────┼──────────────────────────────────┘
+                              │
+                              ▼
+    ┌─────────────────────────────────────────────────────────────┐
+    │                   @app.handler FUNCTION                      │
+    │                                                              │
+    │  def handler(event, context):                               │
+    │      user_input = event.get("inputText")                    │
+    │      response = agent.process_request(user_input)           │
+    │      return {"response": response}                          │
+    │                                                              │
+    └──────────────────────────┬──────────────────────────────────┘
+                               │
+                               ▼
+    ┌─────────────────────────────────────────────────────────────┐
+    │              AWSHELPINGASSISTANT AGENT                       │
+    │                                                              │
+    │  ┌────────────────────────────────────────────────────┐    │
+    │  │         process_request(user_input)                │    │
+    │  │                                                    │    │
+    │  │  1. Analyze user input                             │    │
+    │  │  2. Detect keywords (ec2, s3, lambda, cost)        │    │
+    │  │  3. Route to appropriate handler                   │    │
+    │  └──────────────────┬─────────────────────────────────┘    │
+    │                     │                                       │
+    │     ┌───────────────┼───────────────┬──────────────┐       │
+    │     │               │               │              │       │
+    │     ▼               ▼               ▼              ▼       │
+    │  ┌──────┐      ┌──────┐      ┌─────────┐    ┌──────┐     │
+    │  │ EC2  │      │  S3  │      │ Lambda  │    │ Cost │     │
+    │  │Handler│     │Handler│     │ Handler │    │Handler│    │
+    │  └──┬───┘      └──┬───┘      └────┬────┘    └──┬───┘     │
+    │     │             │               │             │         │
+    │     └─────────────┴───────────────┴─────────────┘         │
+    │                          │                                 │
+    │                          ▼                                 │
+    │                  ┌──────────────┐                          │
+    │                  │   General    │                          │
+    │                  │   Handler    │                          │
+    │                  └──────────────┘                          │
+    └─────────────────────────────────────────────────────────────┘
+                               │
+                               ▼
+                    ┌──────────────────────┐
+                    │  Formatted Response  │
+                    │  with Best Practices │
+                    └──────────────────────┘
+
+
+2. REQUEST FLOW SEQUENCE
+=========================
+
+User                Bedrock             Handler             Agent              Service Handler
+ │                    │                   │                   │                      │
+ │  Send Query        │                   │                   │                      │
+ ├───────────────────>│                   │                   │                      │
+ │                    │                   │                   │                      │
+ │                    │  Invoke Handler   │                   │                      │
+ │                    ├──────────────────>│                   │                      │
+ │                    │                   │                   │                      │
+ │                    │                   │ process_request() │                      │
+ │                    │                   ├──────────────────>│                      │
+ │                    │                   │                   │                      │
+ │                    │                   │                   │  Analyze Query       │
+ │                    │                   │                   ├─────────────────────>│
+ │                    │                   │                   │                      │
+ │                    │                   │                   │  Generate Response   │
+ │                    │                   │                   │<─────────────────────┤
+ │                    │                   │                   │                      │
+ │                    │                   │  Return Response  │                      │
+ │                    │                   │<──────────────────┤                      │
+ │                    │                   │                   │                      │
+ │                    │  Return Result    │                   │                      │
+ │                    │<──────────────────┤                   │                      │
+ │                    │                   │                   │                      │
+ │  Display Response  │                   │                   │                      │
+ │<───────────────────┤                   │                   │                      │
+ │                    │                   │                   │                      │
+
+
+3. DEPLOYMENT ARCHITECTURE
+===========================
+
+    LOCAL DEVELOPMENT                    AWS CLOUD
+    ─────────────────                    ─────────
+
+    ┌──────────────┐                    ┌─────────────────────────┐
+    │  my-agent.py │                    │                         │
+    │requirements.txt│                   │   Bedrock AgentCore     │
+    │   .yaml      │                    │                         │
+    └──────┬───────┘                    │  ┌──────────────────┐   │
+           │                            │  │  Lambda Function │   │
+           │  agentcore configure       │  │  (Agent Runtime) │   │
+           ├───────────────────────────>│  └────────┬─────────┘   │
+           │                            │           │             │
+           │  agentcore launch          │  ┌────────▼─────────┐   │
+           ├───────────────────────────>│  │   IAM Roles &    │   │
+           │                            │  │   Permissions    │   │
+           │                            │  └──────────────────┘   │
+           │                            │                         │
+           │                            │  ┌──────────────────┐   │
+           │                            │  │  CloudWatch Logs │   │
+           │                            │  │   & Metrics      │   │
+           │                            │  └──────────────────┘   │
+           │                            │                         │
+           │  agentcore invoke          │  ┌──────────────────┐   │
+           │<───────────────────────────┤  │  Agent Endpoint  │   │
+           │                            │  └──────────────────┘   │
+           │                            │                         │
+    ┌──────▼───────┐                    └─────────────────────────┘
+    │   Response   │
+    └──────────────┘
+
+
+4. SERVICE HANDLER ROUTING
+===========================
+
+                        User Query
+                            │
+                            ▼
+                    ┌───────────────┐
+                    │  Keyword      │
+                    │  Detection    │
+                    └───────┬───────┘
+                            │
+            ┌───────────────┼───────────────┬──────────────┐
+            │               │               │              │
+            ▼               ▼               ▼              ▼
+    ┌───────────────┐ ┌───────────┐ ┌─────────────┐ ┌──────────┐
+    │ Contains "ec2"│ │Contains"s3"│ │Contains     │ │Contains  │
+    │               │ │           │ │"lambda"     │ │"cost" or │
+    │               │ │           │ │             │ │"billing" │
+    └───────┬───────┘ └─────┬─────┘ └──────┬──────┘ └────┬─────┘
+            │               │              │             │
+            ▼               ▼              ▼             ▼
+    ┌───────────────┐ ┌───────────┐ ┌─────────────┐ ┌──────────┐
+    │ EC2 Handler   │ │ S3 Handler│ │Lambda Handler│ │Cost      │
+    │               │ │           │ │             │ │Handler   │
+    │• Optimization │ │• Storage  │ │• Memory     │ │• Billing │
+    │• Security     │ │  Classes  │ │  Allocation │ │  Analysis│
+    │• Auto Scaling │ │• Versioning│ │• Timeouts   │ │• Budgets │
+    │• Monitoring   │ │• Security │ │• Errors     │ │• Reserved│
+    └───────┬───────┘ └─────┬─────┘ └──────┬──────┘ └────┬─────┘
+            │               │              │             │
+            └───────────────┴──────────────┴─────────────┘
+                            │
+                            ▼
+                    ┌───────────────┐
+                    │   No Match?   │
+                    │ General Handler│
+                    └───────┬───────┘
+                            │
+                            ▼
+                    ┌───────────────┐
+                    │   Response    │
+                    │ with Best     │
+                    │  Practices    │
+                    └───────────────┘
+
+
+5. MONITORING & LOGGING
+========================
+
+    ┌─────────────────────────────────────────────────────────┐
+    │              AGENT EXECUTION                             │
+    │                                                          │
+    │  ┌────────────┐  ┌────────────┐  ┌────────────┐        │
+    │  │  Request   │  │ Processing │  │  Response  │        │
+    │  │  Received  │─>│  Started   │─>│  Returned  │        │
+    │  └────────────┘  └────────────┘  └────────────┘        │
+    └──────────┬───────────────┬───────────────┬──────────────┘
+               │               │               │
+               ▼               ▼               ▼
+    ┌──────────────────────────────────────────────────────────┐
+    │                  CLOUDWATCH LOGS                          │
+    │                                                           │
+    │  • Timestamp                                              │
+    │  • Request ID                                             │
+    │  • User Input                                             │
+    │  • Handler Called                                         │
+    │  • Response Generated                                     │
+    │  • Execution Duration                                     │
+    │  • Errors (if any)                                        │
+    └──────────┬────────────────────────────────────────────────┘
+               │
+               ▼
+    ┌──────────────────────────────────────────────────────────┐
+    │                  CLOUDWATCH METRICS                       │
+    │                                                           │
+    │  • Invocation Count                                       │
+    │  • Error Rate                                             │
+    │  • Latency (p50, p95, p99)                                │
+    │  • Throttles                                              │
+    └──────────┬────────────────────────────────────────────────┘
+               │
+               ▼
+    ┌──────────────────────────────────────────────────────────┐
+    │                     ALARMS & ALERTS                       │
+    │                                                           │
+    │  • High Error Rate → SNS Notification                     │
+    │  • High Latency → SNS Notification                        │
+    │  • Throttling → SNS Notification                          │
+    └───────────────────────────────────────────────────────────┘
+
+
+6. SECURITY LAYERS
+==================
+
+    ┌─────────────────────────────────────────────────────────┐
+    │  LAYER 1: IAM AUTHENTICATION                             │
+    │  • Verify user/service identity                          │
+    │  • Check AWS credentials                                 │
+    └────────────────────────┬────────────────────────────────┘
+                             │
+                             ▼
+    ┌─────────────────────────────────────────────────────────┐
+    │  LAYER 2: IAM AUTHORIZATION                              │
+    │  • Check bedrock:InvokeAgent permission                  │
+    │  • Verify resource access                                │
+    └────────────────────────┬────────────────────────────────┘
+                             │
+                             ▼
+    ┌─────────────────────────────────────────────────────────┐
+    │  LAYER 3: BEDROCK SECURITY                               │
+    │  • Managed service security controls                     │
+    │  • Network isolation                                     │
+    └────────────────────────┬────────────────────────────────┘
+                             │
+                             ▼
+    ┌─────────────────────────────────────────────────────────┐
+    │  LAYER 4: ENCRYPTION                                     │
+    │  • TLS in transit                                        │
+    │  • KMS encryption at rest                                │
+    └────────────────────────┬────────────────────────────────┘
+                             │
+                             ▼
+    ┌─────────────────────────────────────────────────────────┐
+    │  LAYER 5: AUDIT LOGGING                                  │
+    │  • CloudTrail for API calls                              │
+    │  • CloudWatch for execution logs                         │
+    └─────────────────────────────────────────────────────────┘
+
+
+7. COST OPTIMIZATION MODEL
+===========================
+
+    ┌─────────────────────────────────────────────────────────┐
+    │                  SERVERLESS BENEFITS                     │
+    │                                                          │
+    │  ┌────────────────────────────────────────────┐         │
+    │  │  No Idle Resources                         │         │
+    │  │  • Pay only for actual invocations         │         │
+    │  │  • No charges when not in use              │         │
+    │  └────────────────────────────────────────────┘         │
+    │                                                          │
+    │  ┌────────────────────────────────────────────┐         │
+    │  │  Auto-scaling                              │         │
+    │  │  • Scales to zero when idle                │         │
+    │  │  • Scales up automatically with demand     │         │
+    │  └────────────────────────────────────────────┘         │
+    │                                                          │
+    │  ┌────────────────────────────────────────────┐         │
+    │  │  Efficient Processing                      │         │
+    │  │  • Fast response times                     │         │
+    │  │  • Minimal compute duration                │         │
+    │  └────────────────────────────────────────────┘         │
+    │                                                          │
+    │  ┌────────────────────────────────────────────┐         │
+    │  │  No Infrastructure Overhead                │         │
+    │  │  • No servers to manage                    │         │
+    │  │  • No patching or maintenance              │         │
+    │  └────────────────────────────────────────────┘         │
+    └─────────────────────────────────────────────────────────┘
+
+
+LEGEND
+======
+│  = Vertical connection
+─  = Horizontal connection
+┌┐ = Top corners
+└┘ = Bottom corners
+├┤ = T-junctions
+┬┴ = Cross connections
+▼  = Flow direction
+>  = Arrow/pointer
