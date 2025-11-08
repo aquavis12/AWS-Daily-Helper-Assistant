@@ -26,7 +26,7 @@ Get your AWS helper agent up and running in minutes!
 1. Clone this repository:
 ```bash
 git clone https://github.com/aquavis12/AWS-Daily-Helper-Assistant
-cd https://github.com/aquavis12/AWS-Daily-Helper-Assistant
+cd AWS-Daily-Helper-Assistant
 ```
 
 2. Create and activate a virtual environment:
