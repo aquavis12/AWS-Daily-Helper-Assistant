@@ -93,8 +93,6 @@ The toolkit will:
 
 ### Step 4: Test Your Agent
 
-### Step 3: Test Your Agent
-
 Test the deployed agent using the CLI:
 
 **Windows PowerShell:**
@@ -121,53 +119,6 @@ agentcore invoke '{\"prompt\": \"How can I reduce my AWS bill?\"}'
 agentcore invoke '{"prompt": "What are S3 best practices?"}'
 agentcore invoke '{"prompt": "My Lambda function is timing out"}'
 agentcore invoke '{"prompt": "How can I reduce my AWS bill?"}'
-```
-
-## Usage
-
-### Via AgentCore CLI
-
-The simplest way to interact with your agent:
-
-```bash
-agentcore invoke '{"prompt": "Your question here"}'
-```
-
-### Via AWS Console
-
-1. Open Amazon Bedrock Console
-2. Navigate to Agents
-3. Select "AWS Daily Helper"
-4. Use the test interface to interact with the agent
-
-### Via Python API
-
-```python
-import boto3
-
-client = boto3.client('bedrock-agent-runtime', region_name='us-east-1')
-
-response = client.invoke_agent(
-    agentId='<your-agent-id>',
-    agentAliasId='<your-alias-id>',
-    sessionId='<session-id>',
-    inputText='How can I optimize my EC2 costs?'
-)
-
-print(response['completion'])
-```
-
-### Programmatic Usage
-
-```python
-import asyncio
-from my-agent import agent
-
-async def query_agent():
-    response = await agent.process_request("How can I optimize my EC2 costs?")
-    print(response)
-
-asyncio.run(query_agent())
 ```
 
 ## Example Queries
