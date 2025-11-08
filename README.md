@@ -207,31 +207,6 @@ The agent uses the following default configuration:
 
 To modify these settings, update the deployment configuration in your deployment script.
 
-## Troubleshooting
-
-### Configuration Issues
-```bash
-# Reconfigure if needed
-agentcore configure --entrypoint my-agent.py --force
-```
-
-### Local Testing Fails
-- Ensure Docker, Finch, or Podman is installed and running
-- Check that port 8080 is available
-- Verify requirements.txt includes all dependencies
-
-### Deployment Fails
-- Ensure you have necessary IAM permissions for Bedrock
-- Verify AWS credentials: `aws sts get-caller-identity`
-- Check that Bedrock AgentCore is available in your region
-- Review deployment logs: `agentcore logs`
-
-### Agent Not Responding
-- Check agent status: `agentcore status`
-- View logs: `agentcore logs --tail 50`
-- Verify the agent endpoint is accessible
-- Test with a simple query first
-
 ### Common Commands
 
 ```bash
@@ -248,20 +223,10 @@ agentcore launch
 agentcore delete
 ```
 
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
 ## License
 
 This project is licensed under the MIT License.
 
-## Support
-
-For issues and questions:
-- Open an issue on GitHub
-- Check the [Strands Agents documentation](https://strandsagents.com/latest/documentation/)
-- Review AWS Bedrock documentation
 
 ## Acknowledgments
 
