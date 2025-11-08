@@ -58,8 +58,10 @@ Configure the agent with the AgentCore toolkit:
 ```bash
 agentcore configure --entrypoint my-agent.py
 ```
-
-This will set up the necessary configuration for deployment.
+This command will:
+- Set up the necessary configuration for deployment
+- Create a Dockerfile for containerization
+- Prepare your agent for AWS deployment
 
 ### Step 2: Local Testing (Optional)
 
