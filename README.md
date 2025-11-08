@@ -1,14 +1,18 @@
 # AWS Daily Helper Assistant
 
-An intelligent AI assistant built with Strands Agents framework and deployed to AWS Bedrock AgentCore. This agent helps users with daily AWS tasks, providing expert guidance on EC2, S3, Lambda, cost optimization, and general AWS best practices.
+An intelligent AI assistant built with **Strands Agents** framework and deployed to **AWS Bedrock AgentCore**. This agent provides instant, expert guidance on AWS services, helping you optimize costs, improve security, and follow best practices.
 
-## Features
+## 🎯 Features
 
-- **EC2 Management**: Instance optimization, security group configuration, and Auto Scaling guidance
-- **S3 Best Practices**: Storage class selection, versioning, lifecycle policies, and security
-- **Lambda Optimization**: Memory allocation, error handling, and performance monitoring
-- **Cost Optimization**: Billing analysis, budget alerts, and resource optimization strategies
-- **General AWS Guidance**: Architecture recommendations and service selection advice
+- **EC2 Management**: Instance optimization, security groups, Auto Scaling, and performance monitoring
+- **S3 Best Practices**: Storage classes, versioning, lifecycle policies, bucket security, and ACLs
+- **Lambda Optimization**: Memory sizing, environment variables, error handling, and cost monitoring
+- **Cost Optimization**: Billing analysis, budget alerts, Reserved Instances, and resource cleanup
+- **General AWS Guidance**: Architecture design, service recommendations, and security compliance
+
+## 🚀 Quick Start
+
+Get your AWS helper agent up and running in minutes!
 
 ## Prerequisites
 
@@ -121,13 +125,26 @@ agentcore invoke '{"prompt": "My Lambda function is timing out"}'
 agentcore invoke '{"prompt": "How can I reduce my AWS bill?"}'
 ```
 
-## Example Queries
+## 💬 Interactive Chat
+
+Run the interactive chat interface to have a conversation with your agent:
+
+```bash
+python chat.py
+```
+
+This provides a terminal-based chat where you can ask questions and get instant responses.
+
+## 📝 Example Queries
+
+Try asking questions like:
 
 - "How can I optimize my EC2 costs?"
 - "What's the best way to secure my S3 buckets?"
 - "My Lambda function is timing out, what should I check?"
 - "I'm getting a high AWS bill, how can I reduce costs?"
 - "What's the best storage class for infrequently accessed data?"
+- "How do I set up Auto Scaling for my application?"
 
 ## Architecture
 
@@ -168,27 +185,38 @@ The agent is built using:
 - **AWS Bedrock AgentCore**: For deployment and runtime
 - **Service Handlers**: Specialized handlers for EC2, S3, Lambda, Cost, and General queries
 
-For detailed architecture diagrams and flow charts, see [ARCHITECTURE.md](ARCHITECTURE.md).
+For detailed architecture diagrams and flow charts, see [DIAGRAMS.txt](DIAGRAMS.txt).
 
-## Project Structure
+## 📁 Project Structure
 
 ```
 .
-├── my-agent.py          # Main agent implementation
-├── README.md            # This file
-├── blog.md              # Blog post about the project
-├── requirements.txt     # Python dependencies
-└── .venv/               # Virtual environment
+├── my_agent.py                 # Main agent implementation
+├── chat.py                     # Interactive terminal chat interface
+├── test_agent.py               # Local testing script
+├── requirements.txt            # Python dependencies
+├── .bedrock_agentcore.yaml     # AgentCore configuration
+├── README.md                   # This file
+├── ARCHITECTURE.md             # Detailed architecture diagrams
+├── DIAGRAMS.txt                # ASCII architecture diagrams
+├── PROJECT_SUMMARY.md          # Project overview
+├── blog.md                     # Blog post about the project
+└── .venv/                      # Virtual environment (created locally)
 ```
 
-## Configuration
+## ⚙️ Configuration
 
 The agent uses the following default configuration:
 - **Region**: us-east-1
-- **Model**: Claude 3 Sonnet (via Bedrock)
-- **Agent Name**: AWS Daily Helper
+- **Runtime**: Python 3.11+ on ARM64
+- **Agent Name**: my_agent (configurable during setup)
+- **Deployment**: Serverless via AWS Bedrock AgentCore
 
-To modify these settings, update the deployment configuration in your deployment script.
+Configuration is stored in `.bedrock_agentcore.yaml`. To modify settings, edit this file or reconfigure:
+
+```bash
+agentcore configure --entrypoint my_agent.py
+```
 
 ### Common Commands
 
@@ -206,11 +234,26 @@ agentcore launch
 agentcore delete
 ```
 
-## License
+## 🎓 Learn More
+
+- **Blog Post**: Read [Dev.to](https://dev.to/aws-builders/building-an-aws-daily-helper-assistant-with-strands-agents-and-bedrock-agentcore-2290) for a detailed walkthrough of building this agent
+
+## 📄 License
 
 This project is licensed under the MIT License.
 
+## 💡 Support
 
-## Acknowledgments
+For issues and questions:
+- Check the [Strands Agents documentation](https://strandsagents.com/latest/documentation/)
+- Review [AWS Bedrock documentation](https://docs.aws.amazon.com/bedrock/)
+- See [Bedrock AgentCore deployment guide](https://strandsagents.com/latest/documentation/docs/user-guide/deploy/deploy_to_bedrock_agentcore/)
 
-Built with [Strands Agents](https://strandsagents.com/) framework and deployed to AWS Bedrock AgentCore.
+## 🙏 Acknowledgments
+
+Built with:
+- [Strands Agents](https://strandsagents.com/) - AI agent framework
+- [AWS Bedrock AgentCore](https://aws.amazon.com/bedrock/) - Serverless deployment platform
+- Python 3.11+ - Programming language
+
+---
